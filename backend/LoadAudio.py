@@ -31,7 +31,7 @@ try:
         no_speech_threshold=0.6,
         condition_on_previous_text=True,
         initial_prompt=None,
-        word_timestamps=False,  # True si necesitas timestamps por palabra
+        word_timestamps=False,  # True para timestamps por palabra
         fp16=False if device == "cpu" else True
     )
     
