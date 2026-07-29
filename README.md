@@ -1,111 +1,209 @@
-# 🎧 AudioBot AI — Call Center Audio Analyzer
+# AudioBot AI — Call Center Audio Analysis & RAG Platform
 
-An AI-powered chatbot that transcribes call center audio recordings using OpenAI Whisper and lets you ask questions about the conversation through a RAG pipeline powered by Google Gemini and LlamaIndex.
+> **Automated Speech-to-Text Pipeline & Retrieval-Augmented Generation Platform for Conversational Intelligence**
 
-## 📦 Installation
+> [!NOTE]  
+> **Academic Project Status**: This repository represents a fully functional prototype designed for automated speech transcription and document-based Retrieval-Augmented Generation (RAG). The platform natively processes Spanish-language telecommunications audio, enforcing strict system guardrails to prevent out-of-context model hallucinations.
 
-### Prerequisites
+---
 
-- Python 3.10+
-- Node.js 18+
-- [ffmpeg](https://ffmpeg.org/) (required by Whisper)
-- A [Google Gemini API key](https://aistudio.google.com/apikey)
-- NVIDIA GPU recommended (CUDA-enabled PyTorch for faster transcription)
+## Executive Summary
 
-### Backend
+**AudioBot AI** is an end-to-end conversational intelligence platform designed to transcribe, index, and analyze call center audio interactions. The system combines GPU-accelerated local Automatic Speech Recognition (ASR) via **OpenAI Whisper (large-v3)** with a high-performance **Retrieval-Augmented Generation (RAG)** pipeline powered by **LlamaIndex** and **Google Gemini 2.5 Flash**.
+
+By leveraging localized vector embeddings and strict system prompt guardrails, the platform enables domain-specific querying over call transcripts. This ensures that analytical insights, compliance checks, and agent performance evaluations are derived strictly from grounded transcript data rather than generic LLM pre-training.
+
+---
+
+## Technical Features & Core Capabilities
+
+* **Accelerated ASR Pipeline**: Utilizes OpenAI Whisper `large-v3` with beam search optimization, supporting hardware acceleration via PyTorch CUDA on modern GPU architectures.
+* **Grounded RAG Architecture**: Implements LlamaIndex `VectorStoreIndex` coupled with Google Gemini embeddings to construct context-aware transcript vector spaces.
+* **Strict Context Guardrails**: Enforces system-level prompts that prevent the LLM from answering queries unrelated to the provided transcript context.
+* **Granular Timestamping**: Formats ASR outputs into timestamped transcript segments for precise chronological tracking of customer-agent exchanges.
+* **Multilingual Localization**: Native Spanish language configuration (`es`), covering transcription heuristics, system guardrails, and user interface feedback.
+* **Reactive User Interface**: Single-Page Application (SPA) built with React 19 and Vite, featuring typing status indicators and real-time query rendering.
+
+---
+
+## Technology Stack
+
+| Architecture Layer | Technology / Framework | Function / Role |
+| :--- | :--- | :--- |
+| **Speech Recognition** | OpenAI Whisper (`large-v3`) | Localized ASR with PyTorch CUDA acceleration |
+| **Language Model (LLM)** | Google Gemini 2.5 Flash | Contextual reasoning and question answering |
+| **Vector Embeddings** | Gemini Embedding 001 | High-dimensional semantic text representations |
+| **Orchestration Framework**| LlamaIndex (`VectorStoreIndex`) | Ingestion, chunking, and vector index retrieval |
+| **Backend API Service** | Python 3.10+ / Flask / Flask-CORS | REST API exposure and indexing pipeline |
+| **Frontend UI** | React 19 / Vite / Node.js 18+ | Single-Page Application interface |
+| **Audio Processing** | FFmpeg | Audio decoding and media format normalization |
+
+---
+
+## System Architecture Pipeline
+
+The platform processes unstructured audio files through a two-stage pipeline: batch ASR processing followed by vector indexing for real-time querying.
+
+
+```
+
++-----------------------------------------------------------------------------------+
+|                              Audio Ingestion Pipeline                             |
+|                                                                                   |
+|  +--------------------+      +-----------------------+      +------------------+  |
+|  | Call Audio (.mp3)  | ===> | OpenAI Whisper v3     | ===> | Timestamped Text |  |
+|  |  (Telephony Input) |      | (CUDA GPU Engine)     |      |  (call.txt)      |  |
+|  +--------------------+      +-----------------------+      +--------+---------+  |
++----------------------------------------------------------------------|------------+
+|
++----------------------------------------------------------------------v------------+
+|                              RAG Query Engine                                     |
+|                                                                                   |
+|  +--------------------+      +-----------------------+      +------------------+  |
+|  | LlamaIndex Vector  | <=== | Gemini Embedding 001  | <=== | Transcript File  |  |
+|  | Store Index        |      | Vectorization         |      | Parsing          |  |
+|  +---------+----------+      +-----------------------+      +------------------+  |
+|            |                                                                      |
+|            v                                                                      |
+|  +--------------------+      +-----------------------+      +------------------+  |
+|  | User REST Query    | ===> | Gemini 2.5 Flash      | ===> | Grounded Context |  |
+|  |  (/ask endpoint)   |      | LLM Synthesizer       |      | Response         |  |
+|  +--------------------+      +-----------------------+      +------------------+  |
++-----------------------------------------------------------------------------------+
+
+```
+
+---
+
+## Environment & System Prerequisites
+
+* **Operating System**: Linux (Ubuntu 22.04 LTS recommended) or Windows 11
+* **Runtime Environments**:
+  * **Python**: Version 3.10 or higher
+  * **Node.js**: Version 18.0 or higher
+* **Media Dependencies**: **FFmpeg** installed and accessible via system `PATH`
+* **Hardware Requirements**: NVIDIA GPU (e.g., RTX 3070/4070 series) with CUDA drivers configured for accelerated Whisper inference.
+* **API Credentials**: Active **Google Gemini API Key** generated via Google AI Studio.
+
+---
+
+## Local Setup & Deployment Guide
+
+### 1. Repository Setup & Environment Configuration
+Clone the repository and prepare backend environment variables:
+
+```bash
+git clone [https://github.com/your-username/audiobot-ai.git](https://github.com/your-username/audiobot-ai.git)
+cd audiobot-ai
+
+```
+
+Create a `.env` file inside the `backend/` directory:
+
+```env
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+TRANSCRIPTION_PATH=C:\audio\call.txt
+
+```
+
+### 2. Backend Environment Setup
+
+Navigate to the `backend` directory, install required Python dependencies, and configure PyTorch with CUDA support:
 
 ```bash
 cd backend
 pip install -r requirements.txt
+
+# (Required for NVIDIA CUDA GPU Acceleration)
+pip install torch --index-url [https://download.pytorch.org/whl/cu126](https://download.pytorch.org/whl/cu126) --force-reinstall
+
 ```
 
-**(Optional) For NVIDIA GPU acceleration:**
+### 3. Frontend Setup
+
+Navigate to the `frontend` directory and install dependencies:
 
 ```bash
-pip install torch --index-url https://download.pytorch.org/whl/cu126 --force-reinstall
-```
-
-Create a `backend/.env` file:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key
-TRANSCRIPTION_PATH=C:\audio\call.txt
-```
-
-### Frontend
-
-```bash
-cd frontend
+cd ../frontend
 npm install
+
 ```
 
-## 🛠 Usage
+---
 
-The project runs in three phases:
+## Execution Runbook
 
-### 1. Transcribe Audio
+The application operates in three sequential execution phases:
 
-Place your audio file at the path configured in `LoadAudio.py` (default: `C:\audio\Grabacion.mp3`) and run:
+### Phase 1: Audio Transcription Execution
+
+Place the target audio recording (e.g., `Grabacion.mp3`) in the designated directory and run the ASR extraction script:
 
 ```bash
 cd backend
 python LoadAudio.py
+
 ```
 
-This generates a `call.txt` file with the full transcription and timestamped segments.
+*Output: Generates `call.txt` containing timestamped speech-to-text segments.*
 
-### 2. Start the Backend Server
+### Phase 2: Launch Backend Service
+
+Start the Flask application server to initialize the vector index and expose REST endpoints:
 
 ```bash
 cd backend
 python app.py
+
 ```
 
-The Flask server starts at `http://localhost:8090`. It loads the transcription, builds a vector index, and exposes a query API.
+*The API service will bind to `http://localhost:8090`.*
 
-### 3. Start the Frontend
+### Phase 3: Launch Frontend Application
+
+In a separate terminal, launch the Vite development server:
 
 ```bash
 cd frontend
 npm run dev
+
 ```
 
-Open `http://localhost:5173` in your browser and start asking questions about the call.
+*Access the interface by navigating to `http://localhost:5173`.*
 
-## ✨ Features
+---
 
-- **GPU-accelerated transcription** — Automatically uses CUDA if available (tested on RTX 4070 Super)
-- **Whisper large-v3** — Maximum accuracy speech-to-text with beam search and optimized parameters
-- **RAG-based Q&A** — Questions are answered strictly from the call content, not general knowledge
-- **System prompt guard** — The bot refuses to answer questions unrelated to the call transcription
-- **Timestamped segments** — The transcription output includes per-segment timestamps
-- **Real-time chat UI** — Clean React interface with typing indicators and auto-scroll
-> **Note:** The system is configured for Spanish. Whisper transcribes with `language="es"`, the system prompt and UI labels are in Spanish, and error messages displayed to the user are also in Spanish.
+## Production API Specification
 
-## 🧰 Tech Stack
+The backend server exposes the following RESTful endpoints:
 
-| Layer | Technology |
-|-------|-----------|
-| Transcription | OpenAI Whisper (large-v3) + PyTorch CUDA |
-| LLM | Google Gemini 2.5 Flash |
-| Embeddings | Gemini Embedding 001 |
-| RAG Framework | LlamaIndex (VectorStoreIndex) |
-| Backend | Flask + flask-cors |
-| Frontend | React 19 + Vite |
+| Endpoint | Method | Query Parameters | Response Payload | Description |
+| --- | --- | --- | --- | --- |
+| `/status` | `GET` | *None* | `{"ready": true}` | Returns vector store index readiness state. |
+| `/ask` | `GET` | `q` (string) | `{"answer": "..."}` | Queries the RAG index and returns grounded responses. |
 
-## 📡 API Endpoints
+---
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/status` | Returns `{"ready": true/false}` depending on whether a transcription is loaded |
-| `GET` | `/ask?q=<question>` | Queries the RAG engine and returns `{"answer": "..."}` |
+## Localization & Security Guardrails
 
-## 📄 License
+* **Language Specification**: The transcription pipeline is explicitly restricted to Spanish via `language="es"` within Whisper parameters to optimize accuracy and prevent code-switching errors.
+* **System Prompt Isolation**: The LLM system prompt enforces strict bounds. If a query falls outside the semantic context of the call transcript, the service returns a standardized rejection:
+> *"No puedo responder a esta pregunta porque la información no se encuentra en la transcripción de la llamada."*
 
-MIT License
 
-## 🙌 Credits
 
-- [OpenAI Whisper](https://github.com/openai/whisper) for speech-to-text
-- [LlamaIndex](https://github.com/run-llama/llama_index) for the RAG pipeline
-- [Google Gemini](https://ai.google.dev/) for LLM and embeddings
+---
+
+## License & Attribution
+
+* **License**: Open-source under the terms of the [MIT License](https://www.google.com/search?q=LICENSE).
+* **Attribution**:
+* [OpenAI Whisper](https://github.com/openai/whisper) — Automatic Speech Recognition
+* [LlamaIndex](https://github.com/run-llama/llama_index) — Data Framework for LLM Applications
+* [Google Gemini API](https://ai.google.dev/) — Multimodal Generative AI Framework
+
+
+
+```
+
+```
